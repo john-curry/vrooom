@@ -22,6 +22,10 @@ namespace Bytecode {
   const int POP      = 15;
   const int HALT     = 16;
 
+  // this is a convention for the sake of convenience
+  const int FALSE    = 0;
+  const int TRUE     = 1;
+
   std::map<std::string, int> instructions {
     { "IADD",    0  },
     { "ISUB",    0  },

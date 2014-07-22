@@ -1,4 +1,4 @@
-CC = clang++
+CC = g++
 LIBS =
 FLAGS = -g -std=c++11 -Wall -pedantic -o
 PROGRAM = vm

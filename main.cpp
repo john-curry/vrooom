@@ -6,6 +6,21 @@
 using namespace std;
 using namespace Bytecode;
 using namespace Trace;
+
+int line_number_to_absolute_index(int line_number, std::vector<int> code) {
+  int final_position = 0;
+  while (line_number != 0) {                                // use line_number as an index, decrementing whenever an opcode has been found
+    if (instructions[opcodes[code[final_position]]] == 0) { // if instruction has no arguements
+      final_position += 1;                                  // icrement the final position
+    }
+    if (instructions[opcodes[code[final_position]]] == 1) { // if the opcode has one arguement
+      final_position += 2;                                  // move final position up 2 to make up for the arguement
+    }
+    line_number -= 1;                                       // acknoledge that we have gone down a line
+  }
+  return final_position;
+}
+
 template<bool trace, int stack_size>
 class vm {
 public:
@@ -28,10 +43,30 @@ public:
       int opcode = code[ip]; // fetch
       if (trace) trace_opcodes(code, ip, opcode);
       ip++;
-      switch (opcode) {
+      switch (opcode) { //decode
+        case BR: {
+          ip = code[ip + 1];
+        }
+        case BRT: {
+          if (stack[sp--] == TRUE) {
+            ip = line_number_to_absolute_index(code[ip], code);
+          } else {
+            ip++;
+          }
+          stack.pop_back();
+          break;
+        }
+        case BRF: {
+          if (stack[sp--] == FALSE) {
+            ip = line_number_to_absolute_index(code[ip], code);
+          } else {
+            ip++;
+          }
+          stack.pop_back();
+          break;
+        }
         case ICONST: {
-          int var = code[ip];
-          ip++;
+          int var = code[ip++];
           sp++;
           stack.push_back(var);
           break;
@@ -79,6 +114,10 @@ public:
           return;
           break;
         }
+        default: {
+          std::cerr << std::endl << " WARNING: " << "Unimplemented opcode " << opcode << ". Quitting program..." << std::endl;
+          return;
+        }
       }
       print_stack();
     }
@@ -88,15 +127,40 @@ public:
 int main() {
   using namespace Bytecode;
   vector<int> code {
-    ICONST, 99,
-    GSTORE, 0,
-    ICONST, 33,
-    GLOAD, 0,
-    PRINT,
-    HALT    
-    
-  };
+ /*0 */   ICONST, 3,
+ /*1 */   ICONST, 0,
+ /*2 */   BRF, 5,
+ /*3 */   ICONST, 99, 
+ /*4 */   ICONST, 98,
+ /*5 */   ICONST, 97,
+ /*6 */   PRINT,
+ /*7 */   HALT    
+ /*8 */ 
+ /*9 */ };             
+ /*10*/ 
+ /*11*/
+ /*12*/
+ /*13*/
+ /*14*/
+ /*15*/
+ /*16*/
+ /*17*/
 
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
 
   vm<true, 100> mvm(code, 0, 0);
   mvm.cpu();
